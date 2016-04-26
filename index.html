@@ -35,7 +35,16 @@ EXAMPLE IMAGE GRAFANA.ORG</p>
 <a id="passive-os-fingerprinting-with-p0f" class="anchor" href="#passive-os-fingerprinting-with-p0f" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Passive OS Fingerprinting with <a href="http://lcamtuf.coredump.cx/p0f3/">P0f</a>
 </h3>
 
-<p>Still in development</p>
+<p>Still in development :: By passively listening to the TCP Handshake between our honey pot and the attacker we are able to pull the following data:
+     * Detected Remote Operating System
+     * HTTP Client if available, i.e. browser, version and user agent; curl version; wget version</p>
+
+<ul>
+<li>Network Link</li>
+<li>Distance</li>
+<li>Language</li>
+<li>Uptime</li>
+</ul>
 
 <h3>
 <a id="geoip" class="anchor" href="#geoip" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geoip</h3>
