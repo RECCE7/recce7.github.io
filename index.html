@@ -72,9 +72,13 @@ HoneyPotR will come packaged with some basic graphs and output configured by def
 <a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h4>
 
 <ol>
-<li>Navigate to the directory that </li>
-<li>cd </li>
-<li>edit config/global.cfg</li>
+<li>Navigate to the directory where HoneyPotR was installed</li>
+<li>Edit the global.cfg file located in ./config/ so that the Database path points to where the database is installed, note the example below:
+<code>...</code>
+ <code>[Database]</code>
+ <code>path = honeyDB/honeyDB.sqlite</code>
+ <code>...</code>
+</li>
 <li>locate the [ReportServer] section and edit properties to fit your needs.</li>
 </ol>
 
