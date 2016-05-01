@@ -71,28 +71,33 @@ HoneyPotR will come packaged with some basic graphs and output configured by def
 <h4>
 <a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h4>
 
-<ol>
+<ul>
 <li>Navigate to the directory where HoneyPotR was installed</li>
-<li>Edit the global.cfg file located in ./config/ so that the Database path points to where the database is installed, note the example below:
-..<em>```[Database]
-*</em>path = honeyDB/honeyDB.sqlite**
+<li>Edit the <code>global.cfg</code> file located in <code>./config/</code> so that the Database <code>path</code> points to where the database is installed, note the example below:</li>
+</ul>
+
+<pre><code>[Database]
+path = honeyDB/honeyDB.sqlite
 datetime.name = eventDateTime
 peerAddress.name = peerAddress
-localAddress.name = localAddress</li>
-</ol>
+localAddress.name = localAddress
+</code></pre>
 
-<pre><code>1. locate the ReportServer section and edit properties to fit your needs, note the example below:
-..*```[ReportServer]
+<ul>
+<li>Locate the ReportServer section and edit properties to fit your needs, note the example below:</li>
+</ul>
+
+<pre><code>[ReportServer]
 reportserver.logName = reportserver.log
 reportserver.logLevel = DEBUG
 reportserver.host =
 reportserver.port = 8080
 </code></pre>
 
-<ol>
+<ul>
 <li>To start the report server navigate back to the installed directory and run <code>./startReportingServer.sh</code>
 </li>
-</ol>
+</ul>
 
 <h1>
 <a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How It Works</h1>
