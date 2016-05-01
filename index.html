@@ -66,14 +66,17 @@ HoneyPotR will come packaged with some basic graphs and output configured by def
 <h3>
 <a id="rest-api" class="anchor" href="#rest-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>REST API</h3>
 
-<p>Users will have access to reporting data through a RESTful API.  Attack data has been broken into resources in a way that makes it easy to narrow down exactly what information a user may want to access using HTTP GET calls.  This API allows flexibility for our clients to get reporting data however fits best for their environment.  For example if a client already had a GUI for reporting traffic on their network it would be easy for them to make calls to HoneyPotR via the REST API without the need to use Grafana.</p>
+<p>Users will have access to reporting data through a RESTful API.  Attack data resources are represented as <em>JSON Arrays</em> which makes it easy to narrow down and display exactly what information a user may want to access using HTTP GET calls.  This API allows flexibility for our clients to get reporting data however fits best for their environment.  For example if a client already had a GUI for reporting traffic on their network it would be easy for them to make calls to <em>HoneyPotR</em> via the REST API without the need to use <em>Grafana</em>.</p>
 
 <h4>
 <a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h4>
 
-<p>cd 
-edit config/global.cfg
-locate the [ReportServer] section and edit properties to fit your needs.</p>
+<ol>
+<li>Navigate to the directory that </li>
+<li>cd </li>
+<li>edit config/global.cfg</li>
+<li>locate the [ReportServer] section and edit properties to fit your needs.</li>
+</ol>
 
 <p>cd 
 ./startReportingServer.sh</p>
