@@ -73,12 +73,27 @@ HoneyPotR will come packaged with some basic graphs and output configured by def
 
 <ol>
 <li>Navigate to the directory where HoneyPotR was installed</li>
-<li>Edit the global.cfg file located in ./config/ so that the Database path points to where the database is installed, note the example below:
-<code>...</code>
- <code>[Database]</code>
- <code>path = honeyDB/honeyDB.sqlite</code>
- <code>...</code>
-</li>
+<li>Edit the global.cfg file located in ./config/ so that the Database path points to where the database is installed, note the example below:</li>
+</ol>
+
+<pre lang="[Framework]"><code>logName = recce7.log
+logLevel = DEBUG
+listeningAddress =
+
+[Database]
+path = honeyDB/honeyDB.sqlite
+datetime.name = eventDateTime
+peerAddress.name = peerAddress
+localAddress.name = localAddress
+
+[ReportServer]
+reportserver.logName = reportserver.log
+reportserver.logLevel = DEBUG
+reportserver.host =
+reportserver.port = 8080
+</code></pre>
+
+<ol>
 <li>locate the [ReportServer] section and edit properties to fit your needs.</li>
 </ol>
 
