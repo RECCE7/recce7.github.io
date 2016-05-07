@@ -19,7 +19,7 @@
       <h1>
 <a id="purpose-of-project" class="anchor" href="#purpose-of-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Purpose of Project</h1>
 
-<p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can easily write plugins that mimic applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services are guarded appropriately.</p>
+<p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can write plugins that mimic applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services the plugins represent are guarded appropriately.</p>
 
 <h1>
 <a id="features-and-libraries-used" class="anchor" href="#features-and-libraries-used" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features and Libraries Used</h1>
@@ -28,32 +28,34 @@
 <a id="designed-to-run-on-raspberrypi-zero" class="anchor" href="#designed-to-run-on-raspberrypi-zero" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Designed to Run on <a href="https://www.raspberrypi.org/products/pi-zero/">RaspberryPi Zero</a>
 </h3>
 
-<p>Application built around running on a RaspberryPi Zero to make it easy to deploy in any physical environment as well as being cost efficient.  Packages for both <a href="https://www.debian.org/">Debian</a> and <a href="https://www.centos.org/">CentOS</a> available to increase flexibility for users. <em><strong>???WHERE ARE THE PACKAGES???</strong></em></p>
+<p>Application built around running on a RaspberryPi Zero to make it easy to deploy in any physical environment as well as being cost efficient.  Packages for both <a href="https://www.debian.org/">Debian</a> and <a href="https://www.centos.org/">CentOS</a> available to increase flexibility for users.</p>
 
 <h3>
 <a id="displaying-reporting-data-with-grafana" class="anchor" href="#displaying-reporting-data-with-grafana" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Displaying Reporting Data with <a href="http://grafana.org/">Grafana</a>
 </h3>
 
-<p><img src="recce7.github.io/images/dashboard_ex.png" alt="">
-EXAMPLE IMAGE GRAFANA.ORG
-HoneyPotR will come packaged with some basic graphs and output configured by default.   </p>
+<p>HoneyPotR will come packaged with some basic graphs and output configured by default. This allows any user to get up and running with HoneyPotR quick and easy by providing pre-built graphs so that information can be displayed on real time attacks immediately.  Grafana also makes it very easy to build your own graphs in order to display any metrics that fit your needs.
+<img src="recce7.github.io/images/grafana1.png" alt="">
+<img src="recce7.github.io/images/grafana2.png" alt=""></p>
 
 <h3>
 <a id="using-docker-for-builds-and-ci-management" class="anchor" href="#using-docker-for-builds-and-ci-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using <a href="https://www.docker.com/">Docker</a> for Builds and CI Management</h3>
 
-<p>Docker makes it easy to develop, test, build and manage a Continuous Integration development cycle.  By using Docker we have given our clients the ability to run HoneyPotR on any platform that is able to run a Docker Machine.  Although we have designed the application to run on the RaspberryPi platform we understand that some clients may prefer to run the honey pot on other machines, Docker makes this easy to accomplish.</p>
+<p>Docker makes it easy to develop, test, build and manage a Continuous Integration development cycle.  By using Docker we have given our clients the ability to run HoneyPotR on any platform.  If running a Raspberry Pi does no fit your needs, Docker allows you to run our Debian and CentOS packages on any system such as Microsoft and Apple OS X.  Docker can also be used to deploy Grafana on a machine other than the Raspberry Pi.</p>
 
 <h3>
 <a id="passive-os-fingerprinting-with-p0f" class="anchor" href="#passive-os-fingerprinting-with-p0f" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Passive OS Fingerprinting with <a href="http://lcamtuf.coredump.cx/p0f3/">P0f</a>
 </h3>
 
-<p>STILL IN DEVELOPMENT :: By passively listening to the TCP Handshake between our honey pot and the attacker we are able to pull the following data:</p>
+<p>By passively listening to the TCP Handshake between our honey pot and the attacker we are able to pull the following data:</p>
 
 <ul>
-<li>Detected remote Operating System and version</li>
+<li>Time that the attacker connected and disconnected</li>
+<li>Amount of connections the attacker currently has on HoneyPotR</li>
+<li>Detected remote Operating System, version and accuracy estimated system</li>
 <li>HTTP Client if available, i.e. browser, version and user agent; curl version; wget version</li>
 <li>Network Link</li>
-<li>Distance</li>
+<li>Distance, amount of hops made to reach HoneyPotR</li>
 <li>Language</li>
 <li>Uptime</li>
 </ul>
@@ -61,43 +63,12 @@ HoneyPotR will come packaged with some basic graphs and output configured by def
 <h3>
 <a id="geoip" class="anchor" href="#geoip" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geoip</h3>
 
-<p>STILL IN DEVELOPMENT :: Ability to target the location of the attacker with geoip locator tools that will allow us to store and display where attacks are coming from.</p>
+<p>Using a simple cURL call to [ipinfo.io]{<a href="http://ipinfo.io">http://ipinfo.io</a>} we are able to gather useful information regarding the location of the attacker and the type of service they may be using.  We are then mapping the information from this call to a world map that is able to display the location of all attacks made on HoneyPotR.  This world map is accessible via an endpoint in HoneyPotR's REST API so that a user is able to pass a days GET parameter to narrow down the amount of points showing on the map.</p>
 
 <h3>
 <a id="rest-api" class="anchor" href="#rest-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>REST API</h3>
 
-<p>Users will have access to reporting data through a RESTful API.  Attack data resources are represented as <em>JSON Arrays</em> which makes it easy to narrow down and display exactly what information a user may want to access using HTTP GET calls.  This API allows flexibility for our clients to get reporting data however fits best for their environment.  For example if a client already had a GUI for reporting traffic on their network it would be easy for them to make calls to <em>HoneyPotR</em> via the REST API without the need to use <em>Grafana</em>.</p>
-
-<h4>
-<a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h4>
-
-<ul>
-<li>Navigate to the directory where HoneyPotR was installed</li>
-<li>Edit the <code>global.cfg</code> file located in <code>./config/</code> so that the Database <code>path</code> points to where the database is installed, note the example below:</li>
-</ul>
-
-<pre><code>[Database]
-<b>path = honeyDB/honeyDB.sqlite</b>
-datetime.name = eventDateTime
-peerAddress.name = peerAddress
-localAddress.name = localAddress
-</code></pre>
-
-<ul>
-<li>Locate the ReportServer section and edit properties to fit your needs, note the example below:</li>
-</ul>
-
-<pre><code>[ReportServer]
-reportserver.logName = reportserver.log
-reportserver.logLevel = DEBUG
-reportserver.host =
-reportserver.port = 8080
-</code></pre>
-
-<ul>
-<li>To start the report server navigate back to the installed directory and run <code>./startReportingServer.sh</code>
-</li>
-</ul>
+<p>Users will have access to reporting data through a RESTful API.  Attack data resources are represented as JSON Arrays which makes it easy to narrow down and display exactly what information a user may want to access using HTTP GET calls.  This API allows flexibility for our clients to get reporting data however fits best for their environment.  For example if a client already had a GUI for reporting traffic on their network it would be easy for them to make calls to HoneyPotR via the REST API without the need to use Grafana.</p>
 
 <h1>
 <a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How It Works</h1>
@@ -119,6 +90,44 @@ reportserver.port = 8080
 
 <h3>
 <a id="data-reporting" class="anchor" href="#data-reporting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Reporting</h3>
+
+<p>As mentioned in the features section we provide a REST API to allow users to integrate data from our reporting server to their own user interface systems.</p>
+
+<h4>
+<a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h4>
+
+<ul>
+<li>Navigate to the directory where HoneyPotR was installed</li>
+<li>Edit the <code>global.cfg</code> file located in <code>./config/</code> so that the Database <code>path</code> points to where the database is installed, note the example below:</li>
+</ul>
+
+<pre><code>[Database]
+path = honeyDB/honeyDB.sqlite
+datetime.name = eventDateTime
+peerAddress.name = peerAddress
+localAddress.name = localAddress
+</code></pre>
+
+<ul>
+<li>Locate the ReportServer section and edit properties to fit your needs, note the example below:</li>
+</ul>
+
+<pre><code>[ReportServer]
+reportserver.logName = reportserver.log
+reportserver.logLevel = DEBUG
+reportserver.host = 192.168.1.16
+reportserver.port = 8080
+</code></pre>
+
+<ul>
+<li>To start the report server navigate back to the installed directory and run <code>sudo ./startReportingServer.sh</code>
+</li>
+</ul>
+
+<p>If the user decides that Grafan fits their needs they are able to use the default boards that come standard with HoneyPotR, or create their own.</p>
+
+<h4>
+<a id="setup-grafan-reporting-graphs-and-boards" class="anchor" href="#setup-grafan-reporting-graphs-and-boards" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup Grafan Reporting Graphs and Boards</h4>
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
