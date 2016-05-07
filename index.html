@@ -34,7 +34,7 @@
 <a id="displaying-reporting-data-with-grafana" class="anchor" href="#displaying-reporting-data-with-grafana" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Displaying Reporting Data with <a href="http://grafana.org/">Grafana</a>
 </h3>
 
-<p>HoneyPotR will come packaged with some basic graphs and output configured by default. This allows any user to get up and running with HoneyPotR quick and easy by providing pre-built graphs so that information can be displayed on real time attacks immediately.  Grafana also makes it very easy to build your own graphs in order to display any metrics that fit your needs.
+<p>HoneyPotR will come packaged with some basic graphs and output configured by default. This allows any user to get up and running with HoneyPotR quickly by providing pre-built graphs so that information can be displayed for real-time attacks immediately.  Grafana also makes it very easy to build your own graphs in order to display any metrics that fit your needs.
 <img src="recce7.github.io/images/grafana1.png" alt="">
 <img src="recce7.github.io/images/grafana2.png" alt=""></p>
 
@@ -76,12 +76,16 @@
 <h3>
 <a id="framework" class="anchor" href="#framework" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Framework</h3>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p>The framework class is responsible for managing the flow of information throughout the system.  Once the application is started the framework will initiate a <em>NetworkListener</em> that will attempt to complete the TCP handshake of any SYN packets that are addressed to the machine HoneyPotR is running on.  Once this handshake is complete, the framework is able to determine which plugin is being called based on the port number set in the configuration.  As the plugin is running and recording data, it is being passed back down to the framework which then passes it on to the <em>DataManager</em>.</p>
+
+<p>The framework is also responsible for handling the multi-threaded nature of our application, the safe and graceful shutdown of the application and all current connections.  Multiple threads are needed to ensure that each running plugin is able to handle connections from multiple attackers at once while being able to simultaneously write the data that is being collected from the malicious actor.  It is also imperative that HoneyPotR is able to gracefully close all running connections so that no data is lost before it is written.  In the case that the application is compromised we need to shutdown gracefully so that we can end the threat without losing data collected up to that point.</p>
 
 <h3>
 <a id="plugins" class="anchor" href="#plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugins</h3>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p>Each plugin should be developed to match services running in production as closely as possible.  HoneyPotR comes with Telnet and HTTP servers by default.  Both include interfaces in which the attacker can interact with that will record all of the attackers commands.  By including these plugins we give our users an example of how to develop their own services, as well as the ability to collect data while developing their own.</p>
+
+<p>The default plugins are also able to handle scans from popular network scanners such as [Nmap]{<a href="https://nmap.org">https://nmap.org</a>}.  It is common for attacks to start with scans so that the hacker will have an understanding of what services are running on the network.  The ability to capture and record these scans will give us an idea of what kind of information the attacker is looking to gain before going active with his attack.</p>
 
 <h3>
 <a id="data-management" class="anchor" href="#data-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Management</h3>
@@ -139,22 +143,25 @@ reportserver.port = 8080
 <h1>
 <a id="instructions-for-developing-plugins" class="anchor" href="#instructions-for-developing-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions for Developing Plugins</h1>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
-<h3>
-<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h3>
-
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
 <h3>
 <a id="config-file-entries" class="anchor" href="#config-file-entries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Config File Entries</h3>
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
 <h3>
-<a id="data-formatting" class="anchor" href="#data-formatting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Formatting</h3>
+<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h3>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p>Plugins will need to interact with our <em>BasePlugin</em> so that the data can be inserted properly into the database.  There are two methods that plugins must implement.</p>
+
+<h4>
+<a id="do_trackself" class="anchor" href="#do_trackself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>do_track(self):</h4>
+
+<p>Do track will hold all of the logic in the plugin that tracks what a user is doing and stores that information in local data structures that follow the data formatting that is described above.  This will differ for each service that is made into a plugin.  For example we would not expect to see the same kind of attacks hitting a MySQL server as we would for an Apache Web Server.</p>
+
+<h4>
+<a id="get_sessionself" class="anchor" href="#get_sessionself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>get_session(self):</h4>
+
+<p>This method allows HoneyPotR to group attacks into sessions based on when an attacker connects until they disconnect.  The reason that this is not handled in the BasePlugin is that some services natively allow session tracking.  An HTTP server may use cookies or HTTP Headers for tracking sessions while for Telnet we needed to implement a UUID for this.</p>
 
 <h2>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h2>
