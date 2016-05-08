@@ -113,11 +113,79 @@
 <ul>
 <li>Create tables and indexes</li>
 <li>Modify existing table definitions</li>
-<li>Verify that defined columns are valid sqlite3 data types
-#### DataValidator Class</li>
+<li>Verify that defined columns are valid sqlite3 data types</li>
 </ul>
 
 <p>Currently when a user-defined plug-in table is redefined in the plug-in configuration that table will be effectively truncated in order to add or remove the columns defined. In the future it would be good to implement the redefinition in a way that keeps what data is possible to persist between redefinitions.</p>
+
+<h4>
+<a id="datavalidator-class" class="anchor" href="#datavalidator-class" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DataValidator Class</h4>
+
+<p>The DataValidator class is responsible for checking upon insert into the DataQueue that the data that is being inserted is well formed for the database. The DataValidator has access to the schema currently stored in the database. By pulling this schema out of the database it can be used to assist with data validation.  Currently the DataValidator has check methods for the following:</p>
+
+<ul>
+<li>
+<strong>check_value_len:</strong>  This method checks that there is exactly 1 table being written to per insert into the data queue</li>
+<li>
+<strong>check_value_is_dict:</strong> This method checks that the value for insertion is of type dictionary.</li>
+<li>
+<strong>check_key_in_dict_string:</strong> This method checks that the first and only key in the insert dictionary is a string (this key signifies the table name for insertion)</li>
+<li>
+<strong>check_key_is_valid_table_name:</strong> This method checks that the key for the insertion dictionary is actually a table name in the database.</li>
+<li>
+<strong>check_row_value_is_dict:</strong> This method checks that the row values (column: values) of the dictionary provided for insertion is itself a dictionary. For example: {'table1':{'column1':'value1'}}</li>
+<li>
+<strong>check_all_col_names_strings:</strong> This method checks that all the column names to be inserted are strings.</li>
+<li>
+<strong>check_all_col_exist:</strong> This method checks that all the column names provided exist in the target table.</li>
+<li>
+<strong>check_data_types:</strong> <em>Not implemented yet</em> Intended to examine all column values for insertion and to validate against legal regular expressions for the data types we intend to store in the table.</li>
+</ul>
+
+<p>If all checks in the validator do not pass then the value will not be inserted into the DataQueue. Any check errors will be logged to the <code>recce7.log</code> file explaining why that data was not allowed into the data queue. These errors can be useful for plug-in authors when designing a table for their plug-ins.</p>
+
+<h4>
+<a id="dataqueue-class" class="anchor" href="#dataqueue-class" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DataQueue Class</h4>
+
+<p>The DataQueue class simply creates a python Queue and instantiates the DataValidator class. The method <code>insert_into_data_queue</code> is called by the DataManager to insert data into the python Queue. This insert_into_data_queue method runs all the checks provided in the data validator prior to inserting the dictionary into the Queue.  The DataQueue also provides helper methods for <code>get_next_item</code> and <code>check_emtpy</code>.</p>
+
+<h4>
+<a id="table-insert-module" class="anchor" href="#table-insert-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Table Insert Module</h4>
+
+<p>The Table_Insert module provides methods to insert the data from the DataQueue into the database itself.  Because the name-value pairs in the insert dictionary represent the column names and their values it is necessary to prepare the data for insertion.
+The following methods are available in the Table Insert Module:</p>
+
+<ul>
+<li>
+<code>prepare_data_for_insertion</code> orders the values prior to insertion so that the appropriate value goes with the appropriate field in its table</li>
+<li>
+<code>prepare_data_for_insertion</code> also pulls the session information from the plug-in table insert request for storage in the sessions table (if provided) for session grouping visibility</li>
+<li>
+<code>prepare_data_for_insertion</code> also decides whether or not to insert or update data in the p0f (finger printing table) and whether or not to insert a new row in the ipInfo table</li>
+<li>
+<code>insert_data</code> joins the ordered values provided together into a SQL insert statement and inserts data into the sessions table if provided</li>
+<li>
+<code>update_data</code> method constructs a SQL update statement based on a where clause provided. This is currently only used in the p0f preparation because we need the most recent fingerprinting stored with the session in that table instead of a new row if the information changes.</li>
+</ul>
+
+<h4>
+<a id="util-module" class="anchor" href="#util-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Util Module</h4>
+
+<p>The util module contains some common methods used throughout the database code and the configuration for the default columns that are standard for all plug-in tables.  These default columns are pre-pended to all plug-in tables regardless of the extended definitions that the plug-in authors provide therefore are not defined in the plug-ins' configurations file.
+The default columns:</p>
+
+<ul>
+<li>
+<strong>ID :</strong> A sequential primary key and is managed (not passed in by the plug-in) by the database</li>
+<li>
+<strong>session :</strong> A field to associate multiple calls or commands to a given plug-in with each other, if this value is not provided then no rows will be inserted into the sessions table</li>
+<li>
+<strong>eventDateTime :</strong> A field to store the time stamp when the plug-in creates its insert dictionary</li>
+<li>
+<strong>peerAddress :</strong> A field to store the attackers ip address, provided by the plug-in author</li>
+<li>
+<strong>localAddress :</strong> A field to store the local address of the machine the plug-in is running on</li>
+</ul>
 
 <h3>
 <a id="data-reporting" class="anchor" href="#data-reporting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Reporting</h3>
