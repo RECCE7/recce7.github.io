@@ -20,10 +20,14 @@
 <a id="purpose-of-project" class="anchor" href="#purpose-of-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Purpose of Project</h1>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 <p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can easily write custom plugins for applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services are guarded appropriately.</p>
 =======
 <p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can write plugins that mimic applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services the plugins represent are guarded appropriately.</p>
 >>>>>>> 7ede1950fd0717961259de3cf918843eb10e5c3f
+=======
+<p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can write plug-ins that mimic applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services the plug-ins represent are guarded appropriately.</p>
+>>>>>>> 633fe3f0e32ef620cd030e3fa99f3db19b51b0da
 
 <h1>
 <a id="features-and-libraries-used" class="anchor" href="#features-and-libraries-used" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features and Libraries Used</h1>
@@ -77,32 +81,127 @@
 <h1>
 <a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How It Works</h1>
 
+<h2>
+<a id="framework" class="anchor" href="#framework" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Framework</h2>
+
+<p>The framework class is responsible for managing the flow of information throughout the system.  Once the application is started the framework will initiate a <em>NetworkListener</em> that will attempt to complete the TCP handshake of any SYN packets that are addressed to the machine HoneyPotR is running on.  Once this handshake is complete, the framework is able to determine which plug-in is being called based on the port number set in the configuration.  As the plug-in is running and recording data, it is being passed back down to the framework which then passes it on to the <em>DataManager</em>.</p>
+
+<p>The framework is also responsible for handling the multi-threaded nature of our application, the safe and graceful shutdown of the application and all current connections.  Multiple threads are needed to ensure that each running plug-in is able to handle connections from multiple attackers at once while being able to simultaneously write the data that is being collected from the malicious actor.  It is also imperative that HoneyPotR is able to gracefully close all running connections so that no data is lost before it is written.  In the case that the application is compromised we need to shutdown gracefully so that we can end the threat without losing data collected up to that point.</p>
+
+<h2>
+<a id="plug-ins" class="anchor" href="#plug-ins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plug-ins</h2>
+
+<p>Each plug-in should be developed to match services running in production as closely as possible.  HoneyPotR comes with Telnet and HTTP servers by default.  Both include interfaces in which the attacker can interact with that will record all of the attackers commands.  By including these plug-ins we give our users an example of how to develop their own services, as well as the ability to collect data while developing their own.</p>
+
+<p>The default plug-ins are also able to handle scans from popular network scanners such as <a href="https://nmap.org">Nmap</a>.  It is common for attacks to start with scans so that the hacker will have an understanding of what services are running on the network.  The ability to capture and record these scans will give us an idea of what kind of information the attacker is looking to gain before going active with his attack.</p>
+
+<h2>
+<a id="data-management" class="anchor" href="#data-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Management</h2>
+
+<p>HoneyPotR uses <a href="https://www.sqlite.org/">Sqlite3</a> which comes embedded in <a href="https://www.python.org/download/releases/3.0/">Python3</a>.  This made creating a persistant database, that we store locally, easy and lightweight.  All of the data management logic resides in the <code>database</code> directory which contains modules and classes used by the framework to create, modify and insert data into the database. The resulting database is then used by the report server to query data for reporting.</p>
+
+<p>There are two types of tables defined within the system. User defined tables are those tables that users may create columns in for the storing of specific plug-in data. Non-User defined tables are created by various SQL scripts and should not to be altered by plug-in authors. These Non-User defined tables are the ipInfo, p0f and sessions tables.</p>
+
+<p>The <strong>DataManager</strong> is instantiated by the Framework and has access to the global configuration defined in <code>common/config/globals.cfg</code>. The DataManager makes use of this information to both create non-existent tables and to update table definitions in the database by checking the difference between the current schema and the database configuration defined by the plug-in author.  The DataManager also has access to a <strong>DataValidator</strong> class which checks that the data to be inserted is well formed.  The <strong>DataQueue</strong> class contains a Python queue (FIFO) along with some other methods for standard queue operations.  The DataManager gets items from this queue and inserts them to the database.  This method of writing data allows us the ability to write data from the plug-ins without the need to keep those connections open waiting for the database to unlock from other write operations.  To ensure that we do not lose in information in the queue the Framework ensures the queue is empty before shutting down the data management system.</p>
+
 <h3>
-<a id="framework" class="anchor" href="#framework" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Framework</h3>
+<a id="datamanager-class" class="anchor" href="#datamanager-class" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DataManager Class</h3>
 
-<p>The framework class is responsible for managing the flow of information throughout the system.  Once the application is started the framework will initiate a <em>NetworkListener</em> that will attempt to complete the TCP handshake of any SYN packets that are addressed to the machine HoneyPotR is running on.  Once this handshake is complete, the framework is able to determine which plugin is being called based on the port number set in the configuration.  As the plugin is running and recording data, it is being passed back down to the framework which then passes it on to the <em>DataManager</em>.</p>
+<p>The DataManager Class is called by the framework within its start method. The DataManager creates an instance of <strong>Database</strong> so that it can call the  <code>create_default_database</code> method and create the initial database or modify the existing database with updates to the user defined configurations between this run and the previous run of the program. The DataManager then creates the DataQueue object that will be used to store database transactions until the thread can process them by acquiring a condition variable.</p>
 
-<p>The framework is also responsible for handling the multi-threaded nature of our application, the safe and graceful shutdown of the application and all current connections.  Multiple threads are needed to ensure that each running plugin is able to handle connections from multiple attackers at once while being able to simultaneously write the data that is being collected from the malicious actor.  It is also imperative that HoneyPotR is able to gracefully close all running connections so that no data is lost before it is written.  In the case that the application is compromised we need to shutdown gracefully so that we can end the threat without losing data collected up to that point.</p>
+<p>When the Framework calls the DataManager's <code>start</code> method the DataManager's <code>run</code> method will be invoked. This run method will check to see if the queue is empty and then the thread will wait, this will release the lock on the condition variable and block until it is called by notify on that same condition variable.</p>
 
-<h3>
-<a id="plugins" class="anchor" href="#plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugins</h3>
-
-<p>Each plugin should be developed to match services running in production as closely as possible.  HoneyPotR comes with Telnet and HTTP servers by default.  Both include interfaces in which the attacker can interact with that will record all of the attackers commands.  By including these plugins we give our users an example of how to develop their own services, as well as the ability to collect data while developing their own.</p>
-
-<p>The default plugins are also able to handle scans from popular network scanners such as <a href="https://nmap.org">Nmap</a>.  It is common for attacks to start with scans so that the hacker will have an understanding of what services are running on the network.  The ability to capture and record these scans will give us an idea of what kind of information the attacker is looking to gain before going active with his attack.</p>
+<p>When the Framework calls DataManager <code>insert_data method</code> this method will acquire the condition variable and call the Queue's <code>insert_into_data_queue</code> method and will then <code>notify</code> the condition variable telling the run method to continue checking the queue for data to insert. Once the queue is empty the run method will again wait for another notification from the <code>insert_data</code> method. The DataManager also contains a <code>shutdown</code> method that will shut down the thread.</p>
 
 <h3>
-<a id="data-management" class="anchor" href="#data-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Management</h3>
+<a id="database-class-and-table-init-module" class="anchor" href="#database-class-and-table-init-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Database Class and Table Init Module</h3>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p>The <strong>Database</strong> class will create the directory for storing the database itself as well as creating the database file. It will also execute any scripts for creating Non-User defined tables within that database. Finally it will execute the <code>update_schema</code> method that will in turn create and/or update any user defined definitions based on plug-in configuration.  This class interacts with the <strong>Table_Init</strong> module to: </p>
+
+<ul>
+<li>Create tables and indexes</li>
+<li>Modify existing table definitions</li>
+<li>Verify that defined columns are valid sqlite3 data types</li>
+</ul>
+
+<p>Currently when a user-defined plug-in table is redefined in the plug-in configuration that table will be effectively truncated in order to add or remove the columns defined. In the future it would be good to implement the redefinition in a way that keeps what data is possible to persist between redefinitions.</p>
 
 <h3>
-<a id="data-reporting" class="anchor" href="#data-reporting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Reporting</h3>
+<a id="datavalidator-class" class="anchor" href="#datavalidator-class" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DataValidator Class</h3>
+
+<p>The DataValidator class is responsible for checking upon insert into the DataQueue that the data that is being inserted is well formed for the database. The DataValidator has access to the schema currently stored in the database. By pulling this schema out of the database it can be used to assist with data validation.  Currently the DataValidator has check methods for the following:</p>
+
+<ul>
+<li>
+<strong>check_value_len:</strong>  This method checks that there is exactly 1 table being written to per insert into the data queue</li>
+<li>
+<strong>check_value_is_dict:</strong> This method checks that the value for insertion is of type dictionary.</li>
+<li>
+<strong>check_key_in_dict_string:</strong> This method checks that the first and only key in the insert dictionary is a string (this key signifies the table name for insertion)</li>
+<li>
+<strong>check_key_is_valid_table_name:</strong> This method checks that the key for the insertion dictionary is actually a table name in the database.</li>
+<li>
+<strong>check_row_value_is_dict:</strong> This method checks that the row values (column: values) of the dictionary provided for insertion is itself a dictionary. For example: {'table1':{'column1':'value1'}}</li>
+<li>
+<strong>check_all_col_names_strings:</strong> This method checks that all the column names to be inserted are strings.</li>
+<li>
+<strong>check_all_col_exist:</strong> This method checks that all the column names provided exist in the target table.</li>
+<li>
+<strong>check_data_types:</strong> <em>Not implemented yet</em> Intended to examine all column values for insertion and to validate against legal regular expressions for the data types we intend to store in the table.</li>
+</ul>
+
+<p>If all checks in the validator do not pass then the value will not be inserted into the DataQueue. Any check errors will be logged to the <code>recce7.log</code> file explaining why that data was not allowed into the data queue. These errors can be useful for plug-in authors when designing a table for their plug-ins.</p>
+
+<h3>
+<a id="dataqueue-class" class="anchor" href="#dataqueue-class" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DataQueue Class</h3>
+
+<p>The DataQueue class simply creates a python Queue and instantiates the DataValidator class. The method <code>insert_into_data_queue</code> is called by the DataManager to insert data into the python Queue. This insert_into_data_queue method runs all the checks provided in the data validator prior to inserting the dictionary into the Queue.  The DataQueue also provides helper methods for <code>get_next_item</code> and <code>check_emtpy</code>.</p>
+
+<h3>
+<a id="table-insert-module" class="anchor" href="#table-insert-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Table Insert Module</h3>
+
+<p>The Table_Insert module provides methods to insert the data from the DataQueue into the database itself.  Because the name-value pairs in the insert dictionary represent the column names and their values it is necessary to prepare the data for insertion.
+The following methods are available in the Table Insert Module:</p>
+
+<ul>
+<li>
+<code>prepare_data_for_insertion</code> orders the values prior to insertion so that the appropriate value goes with the appropriate field in its table</li>
+<li>
+<code>prepare_data_for_insertion</code> also pulls the session information from the plug-in table insert request for storage in the sessions table (if provided) for session grouping visibility</li>
+<li>
+<code>prepare_data_for_insertion</code> also decides whether or not to insert or update data in the p0f (finger printing table) and whether or not to insert a new row in the ipInfo table</li>
+<li>
+<code>insert_data</code> joins the ordered values provided together into a SQL insert statement and inserts data into the sessions table if provided</li>
+<li>
+<code>update_data</code> method constructs a SQL update statement based on a where clause provided. This is currently only used in the p0f preparation because we need the most recent fingerprinting stored with the session in that table instead of a new row if the information changes.</li>
+</ul>
+
+<h3>
+<a id="util-module" class="anchor" href="#util-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Util Module</h3>
+
+<p>The util module contains some common methods used throughout the database code and the configuration for the default columns that are standard for all plug-in tables.  These default columns are pre-pended to all plug-in tables regardless of the extended definitions that the plug-in authors provide therefore are not defined in the plug-ins' configurations file.
+The default columns:</p>
+
+<ul>
+<li>
+<strong>ID :</strong> A sequential primary key and is managed (not passed in by the plug-in) by the database</li>
+<li>
+<strong>session :</strong> A field to associate multiple calls or commands to a given plug-in with each other, if this value is not provided then no rows will be inserted into the sessions table</li>
+<li>
+<strong>eventDateTime :</strong> A field to store the time stamp when the plug-in creates its insert dictionary</li>
+<li>
+<strong>peerAddress :</strong> A field to store the attackers ip address, provided by the plug-in author</li>
+<li>
+<strong>localAddress :</strong> A field to store the local address of the machine the plug-in is running on</li>
+</ul>
+
+<h2>
+<a id="data-reporting" class="anchor" href="#data-reporting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Reporting</h2>
 
 <p>As mentioned in the features section we provide a REST API to allow users to integrate data from our reporting server to their own user interface systems.</p>
 
-<h4>
-<a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h4>
+<h3>
+<a id="setup-restful-report-server" class="anchor" href="#setup-restful-report-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup RESTful Report Server</h3>
 
 <ul>
 <li>Navigate to the directory where HoneyPotR was installed</li>
@@ -132,10 +231,20 @@ reportserver.port = 8080
 </li>
 </ul>
 
-<p>If the user decides that Grafan fits their needs they are able to use the default boards that come standard with HoneyPotR, or create their own.</p>
+<h3>
+<a id="using-rest-api" class="anchor" href="#using-rest-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using REST API</h3>
 
-<h4>
-<a id="setup-grafan-reporting-graphs-and-boards" class="anchor" href="#setup-grafan-reporting-graphs-and-boards" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup Grafan Reporting Graphs and Boards</h4>
+<p>All responses will return content-type: application/json
+All examples below assume report server configured to respond on <code>localhost</code> and port <code>8080</code></p>
+
+<p><code>GET http://&lt;REPORT SERVER HOST&gt;/v1/analytics</code>
+| <strong>Response Headers</strong> | Content-Type --application/json |
+| <strong>Status Codes</strong> | 200 OK - Request completed successfully |
+| <strong>Request</strong> | http://localhost:8080/v1/analytics |
+| <strong>Response</strong> |  |</p>
+
+<h2>
+<a id="setup-grafana-reporting-graphs-and-boards" class="anchor" href="#setup-grafana-reporting-graphs-and-boards" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup Grafana Reporting Graphs and Boards</h2>
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
@@ -145,27 +254,27 @@ reportserver.port = 8080
 <p><strong><em>Installing by RPM or are we just using git clone and manually setting environment up, then running authbind.sh</em></strong></p>
 
 <h1>
-<a id="instructions-for-developing-plugins" class="anchor" href="#instructions-for-developing-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions for Developing Plugins</h1>
+<a id="instructions-for-developing-plug-ins" class="anchor" href="#instructions-for-developing-plug-ins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions for Developing plug-ins</h1>
 
 <h3>
 <a id="config-file-entries" class="anchor" href="#config-file-entries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Config File Entries</h3>
 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
+<h2>
+<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2>
+
+<p>plug-ins will need to interact with our <em>Baseplug-in</em> so that the data can be inserted properly into the database.  There are two methods that plug-ins must implement.</p>
+
 <h3>
-<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h3>
+<a id="do_trackself" class="anchor" href="#do_trackself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>do_track(self):</h3>
 
-<p>Plugins will need to interact with our <em>BasePlugin</em> so that the data can be inserted properly into the database.  There are two methods that plugins must implement.</p>
+<p>Do track will hold all of the logic in the plug-in that tracks what a user is doing and stores that information in local data structures that follow the data formatting that is described above.  This will differ for each service that is made into a plug-in.  For example we would not expect to see the same kind of attacks hitting a MySQL server as we would for an Apache Web Server.</p>
 
-<h4>
-<a id="do_trackself" class="anchor" href="#do_trackself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>do_track(self):</h4>
+<h3>
+<a id="get_sessionself" class="anchor" href="#get_sessionself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>get_session(self):</h3>
 
-<p>Do track will hold all of the logic in the plugin that tracks what a user is doing and stores that information in local data structures that follow the data formatting that is described above.  This will differ for each service that is made into a plugin.  For example we would not expect to see the same kind of attacks hitting a MySQL server as we would for an Apache Web Server.</p>
-
-<h4>
-<a id="get_sessionself" class="anchor" href="#get_sessionself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>get_session(self):</h4>
-
-<p>This method allows HoneyPotR to group attacks into sessions based on when an attacker connects until they disconnect.  The reason that this is not handled in the BasePlugin is that some services natively allow session tracking.  An HTTP server may use cookies or HTTP Headers for tracking sessions while for Telnet we needed to implement a UUID for this.</p>
+<p>This method allows HoneyPotR to group attacks into sessions based on when an attacker connects until they disconnect.  The reason that this is not handled in the Baseplug-in is that some services natively allow session tracking.  An HTTP server may use cookies or HTTP Headers for tracking sessions while for Telnet we needed to implement a UUID for this.</p>
 
 <h2>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h2>
