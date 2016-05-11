@@ -228,14 +228,89 @@ reportserver.port = 8080
 <p>All responses will return content-type: application/json
 All examples below assume report server configured to respond on <code>localhost</code> and port <code>8080</code></p>
 
-<p><code>GET http://&lt;REPORT SERVER HOST&gt;/v1/analytics</code></p>
+<h4>Analytics Endpoint</h4>
+<p><code>GET http://{REPORT SERVER HOST}/v1/analytics</code></p>
 <table>
-  <tr>
-    <td><strong>Response Headers</strong></td><td>Content-Type --application/json</td>
-    <td><strong>Status Codes</strong></td><td>200 OK - Request completed successfully</td>
-    <td><strong>Request</strong></td><td>http://localhost:8080/v1/analytics</td>
-    <td><strong>Response</strong></td><td></td>
-  </tr>
+  <tr><td><strong>Response Headers</strong></td><td>Content-Type --application/json</td></tr>
+  <tr><td><strong>Status Codes</strong></td><td>200 OK - Request completed successfully</td></tr>
+  <tr><td><strong>Request</strong></td><td>http://localhost:8080/v1/analytics</td></tr>
+  <tr><td><strong>Response</strong></td><td>
+    {
+      "links": [
+          "rel: ports, href: http://127.0.0.1:8080/v1/analytics/ports",
+          "rel: ipaddresses, href:http://127.0.0.1:8080/v1/analytics/ipaddresses"
+      ]
+    }</td></tr>
+</table>
+
+<h4>Ports Endpoint</h4>
+<p><code>GET http://{REPORT SERVER HOST}/v1/analytics/ports</code></p>
+<p>Returns a list of enabled ports and their data.  If the port was marked disabled in the configuration, it will not show up in this response.  Default of the data in the response is timespan of 1 day, unless otherwise specified.</p>
+<table>
+  <tr><td><strong>Response Headers</strong></td><td>Content-Type --application/json</td></tr>
+  <tr><td><strong>Status Codes</strong></td><td>200 OK - Request completed successfully</td></tr>
+  <tr><td><strong>Request</strong></td><td>http://localhost:8080/v1/analytics/ports</td></tr>
+  <tr><td><strong>Optional Parameters</strong></td><td><br class="small">?minutes=xx</br><br class="small">?hours=xx</br><br class="small">?days=xx</br><br class="small">?weeks=xx</br><br class="small">Example: http://localhost:8080/v1/analytics/ports/8023?days=100</br>
+  <tr><td><strong>Response</strong></td><td>
+    [
+        {
+            "timespan": "days=1",
+            "rel_link": "http://127.0.0.1:8080/v1/analytics/ports/8082?days=1",
+            "total_attacks": "0",
+            "port": "8082",
+            "unique_ipaddresses": "0"
+        },
+        {
+            "timespan": "days=1",
+            "rel_link": "http://127.0.0.1:8080/v1/analytics/ports/8083?days=1",
+            "total_attacks": "0",
+            "port": "8083",
+            "unique_ipaddresses": "0"
+        },
+        {
+            "timespan": "days=1",
+            "rel_link": "http://127.0.0.1:8080/v1/analytics/ports/8023?days=1",
+            "total_attacks": "0",
+            "port": "8023",
+            "unique_ipaddresses": "0"
+        }
+    ]
+  </td></tr>
+</table>
+
+<h4>Ports Endpoint : Specify Port Number</h4>
+<p><code>GET http://{REPORT SERVER HOST}/v1/analytics/ports/{PORT NUMBER}</code></p>
+<p>Returns details of attacks for given port.  Default of the data in the response is timespan of 1 day, unless otherwise specified.</p>
+<table>
+  <tr><td><strong>Response Headers</strong></td><td>Content-Type --application/json</td></tr>
+  <tr><td><strong>Status Codes</strong></td><td>200 OK - Request completed successfully</td></tr>
+  <tr><td><strong>Request</strong></td><td>http://localhost:8080/v1/analytics/ports/8023</td></tr>
+  <tr><td><strong>Optional Parameters</strong></td><td><br class="small">?minutes=xx</br><br class="small">?hours=xx</br><br class="small">?days=xx</br><br class="small">?weeks=xx</br><br class="small">Example: http://localhost:8080/v1/analytics/ports/8023?days=100</br>
+  <tr><td><strong>Response</strong></td><td>
+    {
+        "timespan": "days=100",
+        "port": "8082",
+        "items": [
+            {
+                "duration": "22:02:33.477883",
+                "end_time": "2016-04-24T14:14:18.991806",
+                "session_items": [
+                    {
+                        "peerAddress": "127.0.0.1",
+                        "localAddress": "127.0.0.1",
+                        "path": "/login",
+                        "ID": 1,
+                        "headers": "Host: localhost:8082\nConnection: keep-alive\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\nUpgrade-Insecure-Requests: 1\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.86 Safari/537.36\nDNT: 1\nAccept-Encoding: gzip, deflate, sdch\nAccept-Language: en-US,en;q=0.8\nCookie: SESSION=d60718da-e011-4d80-88a2-c745b7af8fd2\n\n",
+                        "eventDateTime": "2016-04-23T16:11:45.513923",
+                        "command": "GET",
+                        "session": "d60718da-e011-4d80-88a2-c745b7af8fd2",
+                        "body": ""
+                    },
+                ]
+              }
+        ]
+    }
+  </td></tr>
 </table>
 
 <h2>
