@@ -428,6 +428,19 @@ All examples below assume report server configured to respond on <code>localhost
   </td></tr>
 </table>
 
+<h4>WorldMap Endpoint</h4>
+<p><code>GET http://{REPORT SERVER HOST}/v1/worldmap</code></p>
+<p>Returns an image map of the location of the ipaddresses. Can scope data by minutes, hours, days, weeks.  If no data scope is given, it defaults to days=1.</p>
+<table>
+  <tr><td><strong>Response Headers</strong></td><td>Content-Type --application/json</td></tr>
+  <tr><td><strong>Status Codes</strong></td><td>200 OK - Request completed successfully</td></tr>
+  <tr><td><strong>Request</strong></td><td>http://{REPORT SERVER HOST}/v1/worldmap?days=10</td></tr>
+  <tr><td><strong>Optional Parameters</strong></td><td><br class="small">?days=xx</br><br class="small">Example: http://localhost:8080/v1/analytics/ports/8023?days=100</br>
+  <tr><td><strong>Response</strong></td><td>
+    <p>A global map with plots of attacks will displayed in browser when this endpoint is called.</p>
+  </td></tr>
+</table>
+
 
 <h2>
 <a id="setup-grafana-reporting-graphs-and-boards" class="anchor" href="#setup-grafana-reporting-graphs-and-boards" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup Grafana Reporting Graphs and Boards</h2>
