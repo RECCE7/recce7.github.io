@@ -602,7 +602,35 @@ $ sudo ldconfig</pre></blockquote>
 <h3>
 <a id="config-file-entries" class="anchor" href="#config-file-entries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Config File Entries</h3>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p><b>The configuration entry name.</b></p>
+<tt>[(string)]</tt>
+<p><b>The port number.</b> The value must lie in the range of 0 to 65535.</p>
+<tt>port = (number)</tt>
+<p><b>The database table name.</b>  This name must adhere to the SQL syntax for table names.</p>
+<tt>table = (string)</tt>
+<p><b>The module name.</b> This will be the name of the python module containing the plug-in class.</p>
+<tt>module = (string)</tt>
+<p><b>The class name.</b>  This is the name of the plug-in class.  This class must exists within the module specified by the module name.</p>
+<tt>moduleClass = (string)</tt>
+<p><b>Specifies if the plug-in is enabled.</b>If this field is set to no the framework will not spawn the listener for the port and no database table will be created.</p>
+<tt>enabled = (Yes or No)</tt>
+<p><b>Specifies if the socket is receiving raw packets.</b> This functionality is currently not implemented in the software.</p>
+<tt>rawSocket = (Yes or No)</tt>
+<p><b>The column indexes, headings, and data types to be interpreted as a Python array.</b> This row provides the parameters for building the dictionary to write plug-in data to the database.</p>
+<tt>tableColumns = ([[column index, column heading, data type], ...]])</tt>
+
+<p><b>Example Configuration</b></p>
+<blockquote><pre>
+[HTTP]
+port = 8083
+table = HTTP
+module = http
+moduleClass = HTTPPlugin
+enabled = Yes
+rawSocket = no
+tableColumns = [[1,'command','TEXT'], [2,'path','TEXT'], [3, 'headers', 'TEXT'], [4, 'body', 'TEXT']]
+</pre></blockquote>
+
 
 <h2>
 <a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2>
@@ -618,6 +646,15 @@ $ sudo ldconfig</pre></blockquote>
 <a id="get_sessionself" class="anchor" href="#get_sessionself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>get_session(self):</h3>
 
 <p>This method allows HoneyPotR to group attacks into sessions based on when an attacker connects until they disconnect.  The reason that this is not handled in the Baseplug-in is that some services natively allow session tracking.  An HTTP server may use cookies or HTTP Headers for tracking sessions while for Telnet we needed to implement a UUID for this.</p>
+
+<h3>
+<a id="get_sessionself" class="anchor" href="#get_sessionself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>close_descriptors(self):</h3>
+<p>This method will handle closing any file descriptors the plug-in has opened.  This method should be called at the end of the plug-in lifecycle.  This includes the natural end of the plug-in or premature end by exceptions.</p>
+
+<h3>
+<a id="get_sessionself" class="anchor" href="#get_sessionself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>do_save(self):</h3>
+<p>This method handles calling the framework to save data to the database.  A dictionary is constructed using the columns defined in the configuration.  The dictionary values are populated by matching the column names with attributes of the same name in the plug-in.  This populated dictionary is sent to the framework to be written to the database.</p>
+
 
 <h2>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h2>
