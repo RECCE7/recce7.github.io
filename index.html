@@ -18,7 +18,7 @@
     <section class="main-content">
       <h1>
 <a id="purpose-of-project" class="anchor" href="#purpose-of-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Purpose of Project</h1>
-<p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can easily write custom plugins for applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services are guarded appropriately.</p>
+<p>Create an easy-install honey pot that any Security Engineer or Systems Administrator can easily write custom plug-ins for applications or services running on their network.  The honey pot needs to display critical data to the user in an easy to read and navigate format.  This tool is useful to show what kind of attacks are going on and verify that the actual services are guarded appropriately.</p>
 
 <h1>
 <a id="features-and-libraries-used" class="anchor" href="#features-and-libraries-used" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features and Libraries Used</h1>
@@ -156,15 +156,15 @@ The following methods are available in the Table Insert Module:</p>
 
 <ul>
 <li>
-<code>prepare_data_for_insertion</code> orders the values prior to insertion so that the appropriate value goes with the appropriate field in its table</li>
+<strong>prepare_data_for_insertion</strong> orders the values prior to insertion so that the appropriate value goes with the appropriate field in its table</li>
 <li>
-<code>prepare_data_for_insertion</code> also pulls the session information from the plug-in table insert request for storage in the sessions table (if provided) for session grouping visibility</li>
+<strong>prepare_data_for_insertion</strong> also pulls the session information from the plug-in table insert request for storage in the sessions table (if provided) for session grouping visibility</li>
 <li>
-<code>prepare_data_for_insertion</code> also decides whether or not to insert or update data in the p0f (finger printing table) and whether or not to insert a new row in the ipInfo table</li>
+<strong>prepare_data_for_insertion</strong> also decides whether or not to insert or update data in the p0f (finger printing table) and whether or not to insert a new row in the ipInfo table</li>
 <li>
-<code>insert_data</code> joins the ordered values provided together into a SQL insert statement and inserts data into the sessions table if provided</li>
+<strong>insert_data</strong> joins the ordered values provided together into a SQL insert statement and inserts data into the sessions table if provided</li>
 <li>
-<code>update_data</code> method constructs a SQL update statement based on a where clause provided. This is currently only used in the p0f preparation because we need the most recent fingerprinting stored with the session in that table instead of a new row if the information changes.</li>
+<atrong>update_data</strong> method constructs a SQL update statement based on a where clause provided. This is currently only used in the p0f preparation because we need the most recent fingerprinting stored with the session in that table instead of a new row if the information changes.</li>
 </ul>
 
 <h3>
@@ -510,7 +510,7 @@ should complete successfully:</p>
 
 <p>After installation you should edit your configuration files. An example configuration is installed by default but
 you'll most likely want to edit the default settings to suit your needs. There are two configuration files located
-in the <tt>/etc/recce7/configs</tt> directory after installation: <tt>global.cfg</tt> and <tt>plugins.cfg</tt>.</p>
+in the <tt>/etc/recce7/configs</tt> directory after installation: <tt>global.cfg</tt> and <tt>plug-ins.cfg</tt>.</p>
 
 <p>In the <tt>global.cfg</tt> file, you should set the following line to the main address of the network interface you would like
 the honeypot to listen on (the address <tt>192.168.0.2</tt> is shown in the example):</p>
@@ -534,8 +534,8 @@ reportserver.host = 127.0.0.1
 reportserver.port = 8080</pre>
 </blockquote>
 
-<p>In the <tt>plugins.cfg</tt> file you can configure the plugins you'd like to run. Each section in this file
-describes one instance of a plugin. An example section looks like this:</p>
+<p>In the <tt>plugins.cfg</tt> file you can configure the plug-ins you'd like to run. Each section in this file
+describes one instance of a plug-in. An example section looks like this:</p>
 
 <blockquote>
   <pre>[MyHTTPInstance]
@@ -548,35 +548,35 @@ rawSocket = no
 tableColumns = [[1,'command','TEXT'], [2,'path','TEXT'], [3, 'headers', 'TEXT'], [4, 'body', 'TEXT']]</pre>
 </blockquote>
 
-<p>This creates a new webserver plugin instance. The section header <tt>[HTTP]</tt> defines the instance's name; this can be
-anything you'd like. The <tt>port</tt> line dictates which port the plugin will listen on. The <tt>module</tt> and <tt>moduleClass</tt>
-lines can specify the type of plugin you wish to run. To create a webserver plugin instance, set the lines as follows:</p>
+<p>This creates a new webserver plug-in instance. The section header <tt>[HTTP]</tt> defines the instance's name; this can be
+anything you'd like. The <tt>port</tt> line dictates which port the plug-in will listen on. The <tt>module</tt> and <tt>moduleClass</tt>
+lines can specify the type of plug-in you wish to run. To create a webserver plug-in instance, set the lines as follows:</p>
 
 <blockquote><pre>module = http
 moduleClass = HTTPPlugin</pre></blockquote>
 
-<p>To create a telnet plugin instance, set the lines as follows:</p>
+<p>To create a telnet plug-in instance, set the lines as follows:</p>
 
 <blockquote><pre>module = telnet
 moduleClass = TelnetPlugin</pre></blockquote>
 
-<p>The <tt>table</tt> line will dictate the name of the table that this plugin instance will use.</p>
+<p>The <tt>table</tt> line will dictate the name of the table that this plug-in instance will use.</p>
 
-<p>A particular plugin type (e.g. http
+<p>A particular plug-in type (e.g. http
 or telnet) may have many running instances so long as they have unique names, unique table names and unique ports; this may be useful
-for running an HTTP plugin on, for example, port 80, port 443, port 8080 or any other port you wish to use.
+for running an HTTP plug-in on, for example, port 80, port 443, port 8080 or any other port you wish to use.
 
-<p>The other lines should not need to be modified unless you plan to extend the functionality of the plugins (see below).</p>
+<p>The other lines should not need to be modified unless you plan to extend the functionality of the plug-ins (see below).</p>
 
 <p><b>Note: </b>Plugins that listen on ports below 1024 will need to be enabled with authbind. When HunnyPotR/Recce7 is started, it drops
 its permissions to the user <tt>nobody</tt> (and group <tt>nogroup</tt>) but retains the ability to listen on low-numbered
 ports using the <tt>authbind</tt> command. Consult the <tt>authbind</tt> manual pages and follow the process to enable the
-desired ports. Port numbers greater than 1024 do not need to be enabled through authbind. The ports used by the default plugin
+desired ports. Port numbers greater than 1024 do not need to be enabled through authbind. The ports used by the default plug-in
 configuration that ships with HunnyPotR/Recce7 will be enabled with authbind during installation.</p>
 
 <h3><a id="installing-basemap" class="anchor" href="#installing-basemap" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing Basemap</h3>
 
-<p>If you wish to use the <tt>/worldmap</tt> reporting server endpoint (see above) you will need to install the Python 3 Basemap module, which is a part of the Matplotlib Python 3 kit. This is an involved process on a Raspberry Pi Zero as the Basemap plugin is quite hefty and requires a large quantity of RAM.</p>
+<p>If you wish to use the <tt>/worldmap</tt> reporting server endpoint (see above) you will need to install the Python 3 Basemap module, which is a part of the Matplotlib Python 3 kit. This is an involved process on a Raspberry Pi Zero as the Basemap plug-in is quite hefty and requires a large quantity of RAM.</p>
 
 <p>You should ensure that you have at least 4GB of storage available on your Raspberry Pi Zero before beginning this process.</p>
 
@@ -602,22 +602,17 @@ $ sudo ldconfig</pre></blockquote>
 <h3>
 <a id="config-file-entries" class="anchor" href="#config-file-entries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Config File Entries</h3>
 
-<p><b>The configuration entry name.</b></p>
-<tt>[(string)]</tt>
-<p><b>The port number.</b> The value must lie in the range of 0 to 65535.</p>
-<tt>port = (number)</tt>
-<p><b>The database table name.</b>  This name must adhere to the SQL syntax for table names.</p>
-<tt>table = (string)</tt>
-<p><b>The module name.</b> This will be the name of the python module containing the plug-in class.</p>
-<tt>module = (string)</tt>
-<p><b>The class name.</b>  This is the name of the plug-in class.  This class must exists within the module specified by the module name.</p>
-<tt>moduleClass = (string)</tt>
-<p><b>Specifies if the plug-in is enabled.</b>If this field is set to no the framework will not spawn the listener for the port and no database table will be created.</p>
-<tt>enabled = (Yes or No)</tt>
-<p><b>Specifies if the socket is receiving raw packets.</b> This functionality is currently not implemented in the software.</p>
-<tt>rawSocket = (Yes or No)</tt>
-<p><b>The column indexes, headings, and data types to be interpreted as a Python array.</b> This row provides the parameters for building the dictionary to write plug-in data to the database.</p>
-<tt>tableColumns = ([[column index, column heading, data type], ...]])</tt>
+<p>The following fields must be filled in for each plug-in configurations.</p>
+<table>
+  <tr><td><strong>The configuration entry name<strong></td><td>Config file entry must start with the plug-in name (does not need to match class name)</td><td><tt>[(string)]</tt></td></tr>
+  <tr><td><strong>The port number</strong></td><td>The value must lie in the range of 0 to 65535</td><td><tt>port = (number)</tt></td></tr>
+  <tr><td><strong>The database table name</strong></td><td>This name must adhere to the SQL syntax for table names</td><td><tt>table = (string)</tt></td></tr>
+  <tr><td><strong>The module name</strong></td><td>This will be the name of the python module containing the plug-in class</td><td><tt>module = (string)</tt></td></tr>
+  <tr><td><strong>The class name</strong></td><td>This is the name of the plug-in class, this class must exists within the module specified by the module name</td><td><tt>moduleClass = (string)</tt></td></tr>
+  <tr><td><strong>Specifies if the plug-in is enabled</strong></td><td>If this field is set to no the framework will not spawn the listener for the port and no database table will be created</td><td><tt>enabled = (Yes or No)</tt></td></tr>
+  <tr><td><strong>Specifies if the socket is receiving raw packets</strong></td><td>This functionality is currently not implemented in the software</td><td><tt>rawSocket = (Yes or No)</tt></td></tr>
+  <tr><td><strong>The column indexes, headings, and data types to be interpreted as a Python array</strong></td><td>This row provides the parameters for building the dictionary to write plug-in data to the database</td><td><tt>tableColumns = ([[column index, column heading, data type], ...]])</tt></td></tr>
+</table>
 
 <p><b>Example Configuration</b></p>
 <blockquote><pre>
@@ -635,7 +630,7 @@ tableColumns = [[1,'command','TEXT'], [2,'path','TEXT'], [3, 'headers', 'TEXT'],
 <h2>
 <a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2>
 
-<p>plug-ins will need to interact with our <em>Baseplug-in</em> so that the data can be inserted properly into the database.  There are two methods that plug-ins must implement.</p>
+<p>Plug-ins will need to interact with our <em>Baseplug-in</em> so that the data can be inserted properly into the database.  There are two methods that plug-ins must implement.</p>
 
 <h3>
 <a id="do_trackself" class="anchor" href="#do_trackself" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>do_track(self):</h3>
