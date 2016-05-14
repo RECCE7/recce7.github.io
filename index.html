@@ -450,7 +450,151 @@ All examples below assume report server configured to respond on <code>localhost
 <h1>
 <a id="how-to-install-and-run-hunnypotr" class="anchor" href="#how-to-install-and-run-hunnypotr" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to Install and Run HunnyPotR</h1>
 
-<p><strong><em>Installing by RPM or are we just using git clone and manually setting environment up, then running authbind.sh</em></strong></p>
+<p>These instructions will walk you through installing and running HunnyPotR/Recce7 on a Raspberry Pi Zero. 
+It is strongly recommended that your Raspberry Pi have at least 4GB of available storage, particularly if you would
+like to generate attacker worldmaps (see "Installing Basemap" below).</p>
+
+<p>These instructions are intended for the Raspbian OS as this is currently the only modern Linux OS available for Raspberry Pi hardware.
+Similar instructions will work on most Debian-derived Linux distributions on x86, ARM or other platforms.</p>
+
+<p>These directions assume that you are starting with a fresh installation of Raspbian and that you are working from a shell in the default user's home directory (<tt>/home/pi/</tt>).</p>
+
+<p>Before beginning, ensure your Raspbian package repositories are up-to-date:</p>
+<blockquote>
+  <pre>$ sudo apt-get update</pre>
+</blockquote>
+
+<p>Download and install the latest release .deb package from the project repository:</p>
+
+<blockquote>
+  <pre>$ wget python3-recce7_1.0-1_all.deb
+$ sudo dpkg -i python3-recce7_1.0-1_all.deb</pre>
+</blockquote>
+
+<p>While this will install the package, it will not automatically install the package's dependencies. To do this, run</p>
+
+<blockquote>
+  <pre>$ sudo apt-get install -f</pre>
+</blockquote>
+
+<p><b>Note: </b>During installation, the following error has been known to prevent the installation from completing:</p>
+
+<blockquote>
+  <pre>(Py3) Installing p0f API module...
+Downloading/unpacking p0f
+  Cannot fetch index base URL https://pypi.python.org/simple/
+  Could not find any downloads that satisfy the requirement p0f
+Cleaning up...
+No distributions at all found for p0f
+Storing debug log for failure in /home/ubuntu/.pip/pip.log
+dpkg: error processing package python3-recce7 (--configure):
+ subprocess installed post-installation script returned error exit status 1
+Setting up blt (2.4z-7ubuntu2) ...
+Setting up python3-tk (3.4.3-1~14.04.2) ...
+Processing triggers for ca-certificates (20160104ubuntu0.14.04.1) ...
+Updating certificates in /etc/ssl/certs... 173 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d....done.
+Processing triggers for libc-bin (2.19-0ubuntu6) ...
+Processing triggers for ureadahead (0.100.0-16) ...
+Errors were encountered while processing:
+ python3-recce7
+E: Sub-process /usr/bin/dpkg returned an error code (1)<pre>
+</blockquote>
+
+<p>This appears to be due to an upstream bug; to remedy the problem, rerun the following command and the installation
+should complete successfully:</p>
+
+<blockquote>
+  <pre>$ sudo apt-get install -f</pre>
+</blockquote>
+
+<p>After installation you should edit your configuration files. An example configuration is installed by default but
+you'll most likely want to edit the default settings to suit your needs. There are two configuration files located
+in the <tt>/etc/recce7/configs</tt> directory after installation: <tt>global.cfg</tt> and <tt>plugins.cfg</tt>.</p>
+
+<p>In the <tt>global.cfg</tt> file, you should set the following line to the main address of the network interface you would like
+the honeypot to listen on (the address <tt>192.168.0.2</tt> is shown in the example):</p>
+
+<blockquote>
+  <pre>[Framework]
+  .
+  .
+  .
+listeningAddress = 192.168.0.2</pre>
+</blockquote>
+
+<p>If you leave this line blank (after the '=') the honeypot will listen on all interfaces by default.</p>
+
+<p>Similarly, you can configure the reporting server to listen for connections on the desired address and port by editing
+these lines:</p>
+
+<blockquote>
+  <pre>[ReportServer]
+reportserver.host = 127.0.0.1
+reportserver.port = 8080</pre>
+</blockquote>
+
+<p>In the <tt>plugins.cfg</tt> file you can configure the plugins you'd like to run. Each section in this file
+describes one instance of a plugin. An example section looks like this:</p>
+
+<blockquote>
+  <pre>[MyHTTPInstance]
+port = 80
+table = http
+module = http
+moduleClass = HTTPPlugin
+enabled = Yes
+rawSocket = no
+tableColumns = [[1,'command','TEXT'], [2,'path','TEXT'], [3, 'headers', 'TEXT'], [4, 'body', 'TEXT']]</pre>
+</blockquote>
+
+<p>This creates a new webserver plugin instance. The section header <tt>[HTTP]</tt> defines the instance's name; this can be
+anything you'd like. The <tt>port</tt> line dictates which port the plugin will listen on. The <tt>module</tt> and <tt>moduleClass</tt>
+lines can specify the type of plugin you wish to run. To create a webserver plugin instance, set the lines as follows:</p>
+
+<blockquote><pre>module = http
+moduleClass = HTTPPlugin</pre></blockquote>
+
+<p>To create a telnet plugin instance, set the lines as follows:</p>
+
+<blockquote><pre>module = telnet
+moduleClass = TelnetPlugin</pre></blockquote>
+
+<p>The <tt>table</tt> line will dictate the name of the table that this plugin instance will use.</p>
+
+<p>A particular plugin type (e.g. http
+or telnet) may have many running instances so long as they have unique names, unique table names and unique ports; this may be useful
+for running an HTTP plugin on, for example, port 80, port 443, port 8080 or any other port you wish to use.
+
+<p>The other lines should not need to be modified unless you plan to extend the functionality of the plugins (see below).</p>
+
+<p><b>Note: </b>Plugins that listen on ports below 1024 will need to be enabled with authbind. When HunnyPotR/Recce7 is started, it drops
+its permissions to the user <tt>nobody</tt> (and group <tt>nogroup</tt>) but retains the ability to listen on low-numbered
+ports using the <tt>authbind</tt> command. Consult the <tt>authbind</tt> manual pages and follow the process to enable the
+desired ports. Port numbers greater than 1024 do not need to be enabled through authbind. The ports used by the default plugin
+configuration that ships with HunnyPotR/Recce7 will be enabled with authbind during installation.</p>
+
+<h3><a id="installing-basemap" class="anchor" href="#installing-basemap" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing Basemap</h3>
+
+<p>If you wish to use the <tt>/worldmap</tt> reporting server endpoint (see above) you will need to install the Python 3 Basemap module, which is a part of the Matplotlib Python 3 kit. This is an involved process on a Raspberry Pi Zero as the Basemap plugin is quite hefty and requires a large quantity of RAM.</p>
+
+<p>You should ensure that you have at least 4GB of storage available on your Raspberry Pi Zero before beginning this process.</p>
+
+<p>It is recommended that you start by creating a swapfile that's at least 1500 MB in size. Consult the <tt>dphys-swapfile</tt> manpage on the Raspberry Pi for instructions on increasing the default swap file size on your system.</p>
+
+<p>Next, download, build and install Basemap (<b>Note: </b>this process can take up to 2 hours to complete):</p>
+
+<blockquote><pre>$ cd ~
+$ wget https://github.com/matplotlib/basemap/archive/v1.0.7rel.tar.gz
+$ tar zxvf v1.0.7rel.tar.gz
+$ cd basemap-1.0.7rel/geos-3.3.3
+$ export GEOS_DIR=/usr/local
+$ ./configure --prefix=$GEOS_DIR
+$ make
+$ sudo make install
+$ cd ../
+$ sudo python3 setup.py install
+$ sudo ldconfig</pre></blockquote>
 
 <h1>
 <a id="instructions-for-developing-plug-ins" class="anchor" href="#instructions-for-developing-plug-ins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions for Developing plug-ins</h1>
