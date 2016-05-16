@@ -445,7 +445,29 @@ All examples below assume report server configured to respond on <code>localhost
 <h2>
 <a id="setup-grafana-reporting-graphs-and-boards" class="anchor" href="#setup-grafana-reporting-graphs-and-boards" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup Grafana Reporting Graphs and Boards</h2>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p> Our Grafana configuration is currently only through docker. However, the sample code used to populate the Graphite database,
+    the data source for Grafana, can easily be pointed to any reachable honeypot report server.
+    To run Grafana follow these steps.
+    <ul>
+        <li>If you have not already, configure<a href="https://docs.docker.com/machine/get-started/"> docker</a></li>
+        <li>Clone the docker <a href="https://github.com/RECCE7/docker">repo</a></li>
+        <li>Set the env var GRAFANA_BUILD_DIR and point it to the grafana directory</li>
+        <li>Navigate to GRAFANA_BUILD_DIR/HoneyDataCollector/src/main/java/utils/reportServer/ and edit ReportRequest.java to point to your report server</li>
+        <li>If you have modified the plugins.cfg file, then you will also want to edit GRAFANA_BUILD_DIR/HoneyDataCollector/src/main/java/GraphitePlayground.java to include your new plugins</li>
+        <li>Execute $GRAFANA_BUILD_DIR/./build. This may take a while the first time and you only need to do this step the first time you run or if you modify the docker files.</li>
+        <li>Once this command finishes execute ./run.</li>
+        <li>Now you may start GraphitePlayGround and watch the as attacks come in.</li>
+        <li>If you need to modify the data that has been placed in Graphite, navigate to GRAFANA_BUILD_DIR/persisted/data/whisper/graphite/carbon/honey and modify the metric path you intend to modify </li>
+    </ul>
+</p>
+<h4>Container Info</h4>
+<table>
+  <tr><td><strong>Grafana Interface</strong></td><td>{http://{DOCKER_HOST}:8085</td></tr>
+  <tr><td><strong>Graphite Web App</strong></td><td>{http://{DOCKER_HOST}:81</td></tr>
+  <tr><td><strong>Grafana Docs</strong></td><td><a href="http://docs.grafana.org/">http://docs.grafana.org/</a></td></tr>
+  <tr><td><strong>Graphite Docs</strong></td><td><a href="http://graphite.readthedocs.io/en/latest/">http://graphite.readthedocs.io/en/latest/</a></td></tr>
+</table>
+
 
 <h1>
 <a id="how-to-install-and-run-hunnypotr" class="anchor" href="#how-to-install-and-run-hunnypotr" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to Install and Run HunnyPotR</h1>
